@@ -11,4 +11,6 @@ HOWEVER, FIRST, I'm working on developing a Conjugate Gradient function.
 
 ## Environment
 
-gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0
+- X86_64
+- ubuntu
+- gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0

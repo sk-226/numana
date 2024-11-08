@@ -2,20 +2,20 @@
 #ifndef _VECTOR_H_
 #define _VECTOR_H_
 
-#include <stdlib.h>
+#include <stddef.h>  // NULLを定義する
 #include <stdio.h>
-#include <stddef.h> // NULLを定義する
+#include <stdlib.h>
 
-typedef struct vector {
-  int size; // ベクトルの要素数
-  double *data; // ベクトルの要素を格納する配列
+typedef struct {
+  int size;      // ベクトルの要素数
+  double *data;  // ベクトルの要素を格納する配列
 } Vector;
 
 // ベクトルの作成と開放
-extern Vector* create_vector(int size);
-extern void free_vector(Vector *vec);
+Vector *create_vector(int size);
+void free_vector(Vector *vec);
 
 // ベクトルの表示
-extern void print_vector(Vector *vec);
+void print_vector(Vector *vec);
 
-#endif // _VECTOR_H_
+#endif  // _VECTOR_H_

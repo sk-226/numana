@@ -11,29 +11,34 @@ int main(void) {
   }
 
   /* メタデータを格納する変数 */
+  // コメントアウトされている変数について, Only present if there are right-hand
+  // sides presents
   char title[81] = "";
   char date[81] = "";
   char author[81] = "";
   char ed[81] = "";
   char id[81] = "";
 
-  int totcrd = 0;
-  int ptrcrd = 0;
-  int indcrd = 0;
-  int valcrd = 0;
-  // int rhscrd = 0;
+  int totcrd = 0;  // Total number of lines excluding header
+  int ptrcrd = 0;  // Number of lines for pointers
+  int indcrd = 0;  // Number of lines for row (or variables) indices
+  int valcrd = 0;  // Number of lines for numerical values
+  // int rhscrd = 0;  // Number of lines for right-hand sides??
 
-  char mxtype[4] = "";
-  int nrow = 0;
-  int ncol = 0;
-  int nnzero = 0;
-  int neltvl = 0;
+  char mxtype[4] = "";  // Matrix type
+  int nrow = 0;         // Number of rows (or variables)
+  int ncol = 0;         // Numbers of columns (or elements)
+  int nnzero = 0;       // Number of non-zeros
+  int neltvl = 0;  // Number of elemental matrix entries (zero in the case of
+                   // assembled matrices)
 
-  char ptrfmt[17] = "";
-  char indfmt[17] = "";
+  char ptrfmt[17] = "";  // Format for pointers
+  char indfmt[17] = "";  // Format for row (or variables) indices
   char valfmt[21] = "";  // Format for numerical values of coefficient,
                          // str->doubleでキャストするように
-  // char rhsfmt[21] = "";
+  // char rhsfmt[21] = "";  // Format for numerical values of right-hand sides??
+
+  // Line 5 on headers -> only present if there are right-hand sides
 
   /* 行を読み込むときのための変数 */
   char line[1024];

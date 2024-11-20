@@ -23,7 +23,7 @@ int main(void) {
   int ptrcrd = 0;  // Number of lines for pointers
   int indcrd = 0;  // Number of lines for row (or variables) indices
   int valcrd = 0;  // Number of lines for numerical values
-  // int rhscrd = 0;  // Number of lines for right-hand sides??
+  int rhscrd = 0;  // Number of lines for right-hand sides??
 
   char mxtype[4] = "";  // Matrix type
   int nrow = 0;         // Number of rows (or variables)
@@ -36,7 +36,7 @@ int main(void) {
   char indfmt[17] = "";  // Format for row (or variables) indices
   char valfmt[21] = "";  // Format for numerical values of coefficient,
                          // str->doubleでキャストするように
-  // char rhsfmt[21] = "";  // Format for numerical values of right-hand sides??
+  char rhsfmt[21] = "";  // Format for numerical values of right-hand sides??
 
   // Line 5 on headers -> only present if there are right-hand sides
 
@@ -89,9 +89,9 @@ int main(void) {
       // "           13             1             2            10"
       // フォーマットに従ってそれぞれの整数を抽出
       // 少なくとも1つ以上のスペースがあるとき、スペースで区切る
-      // sscanf(line, " %d %d %d %d %d", &totcrd, &ptrcrd, &indcrd, &valcrd,
-      // &rhscrd);
-      sscanf(line, " %d %d %d %d", &totcrd, &ptrcrd, &indcrd, &valcrd);
+      sscanf(line, " %d %d %d %d %d", &totcrd, &ptrcrd, &indcrd, &valcrd,
+             &rhscrd);
+      // sscanf(line, " %d %d %d %d", &totcrd, &ptrcrd, &indcrd, &valcrd);
     } else if (line_number == 3) {
       printf("line3!!!!\n");
       // mxtype, nrow, ncol, nnzero, neltvl
@@ -103,8 +103,8 @@ int main(void) {
       // ptrfmt, indfmt, valfmt, rhsfmt
       // e.g.
       // " (26I3) (26I3) (3E25.17)"
-      // sscanf(line, "(%4s) (%4s) (%4s)", ptrfmt, indfmt, valfmt, rhsfmt);
-      sscanf(line, "%16s %16s %20s", ptrfmt, indfmt, valfmt);
+      sscanf(line, "%16s %16s %20s %20s)", ptrfmt, indfmt, valfmt, rhsfmt);
+      // sscanf(line, "%16s %16s %20s", ptrfmt, indfmt, valfmt);
     } else {
       // それ以外の行は無視
     }
@@ -125,7 +125,7 @@ int main(void) {
   printf("ptrcrd: %d\n", ptrcrd);
   printf("indcrd: %d\n", indcrd);
   printf("valcrd: %d\n", valcrd);
-  // printf("rhscrd: %d\n", rhscrd);
+  printf("rhscrd: %d\n", rhscrd);
   printf("\n");
 
   printf("mxtype: %s\n", mxtype);
@@ -138,7 +138,7 @@ int main(void) {
   printf("ptrfmt: %s\n", ptrfmt);
   printf("indfmt: %s\n", indfmt);
   printf("valfmt: %s\n", valfmt);
-  // printf("rhsfmt: %s\n", rhsfmt);
+  printf("rhsfmt: %s\n", rhsfmt);
   printf("\n");
 
   return 0;

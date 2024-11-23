@@ -1,6 +1,44 @@
+#include <ctype.h>  // for parse_format function
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+typedef struct {
+  int num_rows;      // 行数
+  int num_cols;      // 列数
+  int num_nonzeros;  // 非ゼロ要素の数
+  double valfmt;     // Format for numerical values of coefficient
+
+  double *values;  // 非ゼロ要素の値
+  int *col_ind;    // 非ゼロ要素の列インデックス
+  int *row_ptr;    // 各行の非ゼロ要素の開始位置 (values[row_ptr[i-1]] ~
+                   // values[row_ptr[i-1] - 1]までの値が1行の中にある)
+} CSRMatrix;
+
+int parse_format(const char *fmt_str) {
+  /* フォーマット指定子からフィールド幅を取得する関数 */
+  // e.g. "(16I5)" -> 5
+  int field_width = 0;
+  const char *p = fmt_str;
+
+  // '(' をスキップ
+  while (*p && *p != '(') p++;
+  if (*p == '(') p++;
+
+  // 数字をスキップ
+  while (*p && isdigit((unsigned char)*p)) p++;
+
+  // データ型を取得 (一旦返すのはfield_widthのみ)
+  char data_type = toupper((unsigned char)*p);
+  p++;
+
+  // フィールド値を取得
+  if (isdigit((unsigned char)*p)) {
+    field_width = atoi(p);
+  }
+
+  return field_width;
+}
 
 int main(void) {
   const char *filepath = "../data/LFAT5.rb";
@@ -41,8 +79,8 @@ int main(void) {
   // Line 5 on headers -> only present if there are right-hand sides
 
   /* 行を読み込むときのための変数 */
-  char line[1024];
-  // char line[81];
+  // char line[1024];
+  char line[82];
   int line_number = 0;
 
   /* ファイルから行を読み込む */
@@ -83,7 +121,6 @@ int main(void) {
       }
       strncpy(id, parts[4], sizeof(id));
     } else if (line_number == 2) {
-      printf("line2!!!!\n");
       // totcrd, ptrcrd, indcrd, valcrd, rhscrd
       // e.g.
       // "           13             1             2            10"
@@ -93,23 +130,53 @@ int main(void) {
              &rhscrd);
       // sscanf(line, " %d %d %d %d", &totcrd, &ptrcrd, &indcrd, &valcrd);
     } else if (line_number == 3) {
-      printf("line3!!!!\n");
       // mxtype, nrow, ncol, nnzero, neltvl
       // e.g.
       // "rsa                       14            14            30 0"
       sscanf(line, "%3s %d %d %d %d", mxtype, &nrow, &ncol, &nnzero, &neltvl);
     } else if (line_number == 4) {
-      printf("line4!!!!\n");
       // ptrfmt, indfmt, valfmt, rhsfmt
       // e.g.
       // " (26I3) (26I3) (3E25.17)"
       sscanf(line, "%16s %16s %20s %20s)", ptrfmt, indfmt, valfmt, rhsfmt);
-      // sscanf(line, "%16s %16s %20s", ptrfmt, indfmt, valfmt);
     } else {
       // それ以外の行は無視
+      break;
     }
-    // printf("%s\n", line);
+    printf("%s\n", line);
   }
+
+  // // フォーマット指定子からフィールド幅を取得
+  // int ptr_field_width = parse_format(ptrfmt);
+  // int ind_field_width = parse_format(indfmt);
+  // int val_field_width = parse_format(valfmt);
+
+  // CSRMatrix A;
+  // A.valfmt = 1.0; // 仮の倍率
+  // A.num_rows = nrow;
+  // A.num_cols = ncol;
+  // A.num_nonzeros = nnzero;
+
+  // // メモリを確保する
+  // A.row_ptr = (int *)malloc(sizeof(int) * (A.num_rows + 1));
+  // A.col_ind = (int *)malloc(sizeof(int) * (A.num_nonzeros + 1));
+  // A.values = (double *)malloc(sizeof(double) * (A.num_nonzeros + 1));
+
+  // if (A.row_ptr == NULL || A.col_ind == NULL || A.values == NULL) {
+  //   perror("Error allocating memory for matrix data");
+  //   return 1;
+  // }
+
+  // /* ptrcrd 行分の row_ptr データを読み込み */
+  // int data_line_number  = 0;
+  // for (int i = 0; i < ptrcrd; i++) {
+  //   if (fgets(line, sizeof(line), fp) == NULL) {
+  //     fprintf(stderr, "Error reading row_ptr data\n");
+  //     fclose(fp);
+  //   }
+  // }
+  // // データをパースして row_ptr に格納
+  // for (int j = 0; j < )
 
   fclose(fp);
 
@@ -140,6 +207,11 @@ int main(void) {
   printf("valfmt: %s\n", valfmt);
   printf("rhsfmt: %s\n", rhsfmt);
   printf("\n");
+
+  /**
+   * @brief 行列の情報
+   *
+   */
 
   return 0;
 }

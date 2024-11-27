@@ -20,7 +20,7 @@ void free_vector(Vector *vec) {
 }
 
 // ベクトルの表示
-void print_vector(Vector *vector) {
+void print_vector(const Vector *vector) {
   printf("Vector of size: %d\n", vector->size);
   for (int i = 0; i < vector->size; i++) {
     printf(" [%d] = %lf\n", i, vector->data[i]);

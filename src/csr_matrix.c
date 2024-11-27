@@ -38,7 +38,7 @@ void free_csr_matrix(CSRMatrix* matrix) {
   }
 }
 
-void print_csr_matrix(CSRMatrix* matrix) {
+void print_csr_matrix(const CSRMatrix* matrix) {
   for (int i = 0; i < matrix->num_rows; i++) {
     int start = matrix->row_ptr[i];
     int end = matrix->row_ptr[i + 1];

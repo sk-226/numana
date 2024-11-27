@@ -51,7 +51,7 @@ void free_csr_matrix(CSRMatrix *matrix);
  *
  * @param matrix
  */
-void print_csr_matrix(CSRMatrix *matrix);
+void print_csr_matrix(const CSRMatrix *matrix);
 
 /**
  * @brief Parse the format specifier to get the field width

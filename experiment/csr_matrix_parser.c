@@ -3,22 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-void print_csr_matrix(int num_rows, double values[], int col_ind[],
-                      int row_ptr[]) {
-  for (int i = 0; i <= num_rows; i++) {
-    int start = row_ptr[i] - 1;
-    int end = row_ptr[i + 1] - 1;
-
-    for (int j = start; j <= end; ++j) {
-      int row = i + 1;
-      int column = col_ind[j];
-      double val = values[j];
-
-      printf("(%d, %d)  %e \n", row, column, val);
-    }
-  }
-}
-
 typedef struct {
   int num_rows;      // 行数
   int num_cols;      // 列数
@@ -30,6 +14,22 @@ typedef struct {
   int *row_ptr;    // 各行の非ゼロ要素の開始位置 (values[row_ptr[i-1]] ~
                    // values[row_ptr[i-1] - 1]までの値が1行の中にある)
 } CSRMatrix;
+
+
+void print_csr_matrix(CSRMatrix *matrix) {
+  for (int i = 0; i < matrix->num_rows; i++) {
+    int start = matrix->row_ptr[i];
+    int end = matrix->row_ptr[i + 1];
+
+    for (int j = start; j < end; ++j) {
+      int row = i + 1;
+      int column = matrix->col_ind[j];
+      double val = matrix->values[j];
+
+      printf("(%d, %d)  %e \n", row, column, val);
+    }
+  }
+}
 
 int parse_format(const char *fmt_str) {
   /* フォーマット指定子からフィールド幅を取得する関数 */
@@ -57,7 +57,7 @@ int parse_format(const char *fmt_str) {
 }
 
 int main(void) {
-  const char *filepath = "../data/nos5.rb";
+  const char *filepath = "../data/LFAT5.rb";
   FILE *fp = fopen(filepath, "r");
   if (fp == NULL) {
     perror("Error opening file");
@@ -68,7 +68,7 @@ int main(void) {
   // コメントアウトされている変数について, Only present if there are right-hand
   // sides presents
   char title[81] = "";
-  char date[81] = "";
+  char date[5] = "";
   char author[81] = "";
   char ed[81] = "";
   char id[81] = "";
@@ -160,7 +160,7 @@ int main(void) {
       break;
     }
   }
-  printf("%s\n", line);
+  // printf("%s\n", line);
 
   /**
    * @brief 行列のデータを読み込む
@@ -275,7 +275,7 @@ int main(void) {
     matrix.values[index++] = value;
     token = strtok(NULL, " ");
   }
-  printf("index: %d\n", index);
+  // printf("index: %d\n", index);
   if (index != matrix.num_nonzeros) {
     fprintf(stderr, "Error: values data count mismatch\n");
     fclose(fp);
@@ -334,8 +334,7 @@ int main(void) {
   printf("\n");
 
   /* CSRMatrix matrix の内容を表示 */
-  print_csr_matrix(matrix.num_rows, matrix.values, matrix.col_ind,
-                   matrix.row_ptr);
+  print_csr_matrix(&matrix);
 
   // メモリの開放
   free(matrix.row_ptr);

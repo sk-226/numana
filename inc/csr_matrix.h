@@ -19,27 +19,45 @@ typedef struct {
   double *values;  // 非ゼロ要素の値
 } CSRMatrix;
 
-/* ベクトルの作成と開放 */
-// TODO: ゼロおよび非ゼロ要素もまとめて一時的にarrayに変換
-// TODO: CSR形式用パーサーの関数
 /**
- * @brief この関数を一番最初に読み出し、rb形式(Rutherford
- * Boeing形式)の行列をCSRMatrixとして変数化する。 e.g CSRMatrix *A =
- * read_csr_matrix(char *mat_file_name);
- * @param char *filename
+ * @brief Read a matrix from a file in the Rutherford-Boeing format
+ *
+ * @param filepath
  * @return CSRMatrix*
- * @sa CSRMatirx* create_csr_matrix(int num_rows, int num_cols, int
- * num_nonzeros)
- * @detail num_rows, num_cols, _num_nonzerosは既知とする。
- * -> create_csr_matrixを呼び出す。
  */
 CSRMatrix *read_rb_matrix(const char *filepath);
+
+/**
+ * @brief Create a CSRMatrix object
+ *
+ * @param num_rows
+ * @param num_cols
+ * @param num_nonzeros
+ * @param valfmt
+ * @return CSRMatrix*
+ */
 CSRMatrix *create_csr_matrix(int num_rows, int num_cols, int num_nonzeros,
                              double valfmt);
+
+/**
+ * @brief Free the CSRMatrix object
+ *
+ * @param matrix
+ */
 void free_csr_matrix(CSRMatrix *matrix);
 
-// ベクトルの表示
+/**
+ * @brief Print the CSRMatrix object
+ *
+ * @param matrix
+ */
 void print_csr_matrix(CSRMatrix *matrix);
 
+/**
+ * @brief Parse the format specifier to get the field width
+ *
+ * @param fmt_str
+ * @return int
+ */
 int parse_format(const char *fmt_str);
 #endif  // _CSR_MATRIX_H_

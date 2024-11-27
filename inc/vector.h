@@ -11,11 +11,28 @@ typedef struct {
   double *data;  // ベクトルの要素を格納する配列
 } Vector;
 
-// ベクトルの作成と開放
+/**
+ * @brief Create a vector object
+ * 
+ * @param size 
+ * @return Vector* 
+ */
 Vector *create_vector(int size);
+
+/**
+ * @brief Free the vector object
+ * 
+ * @param vec 
+ */
 void free_vector(Vector *vec);
 
-// ベクトルの表示
+/**
+ * @brief Print the vector
+ * 
+ * @param vec 
+ */
 void print_vector(Vector *vec);
+
+
 
 #endif  // _VECTOR_H_

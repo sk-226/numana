@@ -8,8 +8,8 @@
 #include <stdlib.h>
 
 typedef struct {
-  int size;      // ベクトルの要素数
-  double *data;  // ベクトルの要素を格納する配列
+  int size;        // ベクトルの要素数
+  double *values;  // ベクトルの要素を格納する配列
 } Vector;
 
 /**
@@ -90,8 +90,7 @@ double vec_norm(const Vector *vec);
  *
  * @param src
  * @param dest
- * @return double
  */
-double vec_copy(const Vector *src, Vector *dest);
+void vec_copy(const Vector *src, Vector *dest);
 
 #endif  // _VECTOR_H_

@@ -15,6 +15,22 @@ typedef struct {
                    // values[row_ptr[i-1] - 1]までの値が1行の中にある)
 } CSRMatrix;
 
+
+void print_csr_matrix(CSRMatrix *matrix) {
+  for (int i = 0; i < matrix->num_rows; i++) {
+    int start = matrix->row_ptr[i];
+    int end = matrix->row_ptr[i + 1];
+
+    for (int j = start; j < end; ++j) {
+      int row = i + 1;
+      int column = matrix->col_ind[j];
+      double val = matrix->values[j];
+
+      printf("(%d, %d)  %e \n", row, column, val);
+    }
+  }
+}
+
 int parse_format(const char *fmt_str) {
   /* フォーマット指定子からフィールド幅を取得する関数 */
   // e.g. "(16I5)" -> 5
@@ -52,7 +68,7 @@ int main(void) {
   // コメントアウトされている変数について, Only present if there are right-hand
   // sides presents
   char title[81] = "";
-  char date[81] = "";
+  char date[5] = "";
   char author[81] = "";
   char ed[81] = "";
   char id[81] = "";
@@ -138,59 +154,138 @@ int main(void) {
       // e.g.
       // " (26I3) (26I3) (3E25.17)"
       sscanf(line, "%16s %16s %20s %20s)", ptrfmt, indfmt, valfmt, rhsfmt);
+      break;
     } else {
       // それ以外の行は無視
       break;
     }
-    printf("%s\n", line);
   }
+  // printf("%s\n", line);
+
+  /**
+   * @brief 行列のデータを読み込む
+   * TODO: 関数化する
+   *
+   */
 
   // フォーマット指定子からフィールド幅を取得
   int ptr_field_width = parse_format(ptrfmt);
   int ind_field_width = parse_format(indfmt);
   int val_field_width = parse_format(valfmt);
+  printf("val_field_width: %d\n", val_field_width);
 
-  CSRMatrix A;
-  A.valfmt = 1.0;  // 仮の倍率
-  A.num_rows = nrow;
-  A.num_cols = ncol;
-  A.num_nonzeros = nnzero;
+  CSRMatrix matrix;
+  matrix.valfmt = 1.0;  // 仮の倍率
+  matrix.num_rows = nrow;
+  matrix.num_cols = ncol;
+  matrix.num_nonzeros = nnzero;
 
-  // メモリを確保する
-  A.row_ptr = (int *)malloc(sizeof(int) * (A.num_rows + 1));
-  A.col_ind = (int *)malloc(sizeof(int) * (A.num_nonzeros + 1));
-  A.values = (double *)malloc(sizeof(double) * (A.num_nonzeros + 1));
+  // 行列のメモリを確保する
+  matrix.row_ptr = (int *)malloc(sizeof(int) * (matrix.num_rows + 1));
+  matrix.col_ind = (int *)malloc(sizeof(int) * (matrix.num_nonzeros + 1));
+  matrix.values = (double *)malloc(sizeof(double) * (matrix.num_nonzeros + 1));
 
-  if (A.row_ptr == NULL || A.col_ind == NULL || A.values == NULL) {
+  if (matrix.row_ptr == NULL || matrix.col_ind == NULL ||
+      matrix.values == NULL) {
     perror("Error allocating memory for matrix data");
     return 1;
   }
+  // バッファサイズを設定
+  // valuesのバッファサイズはプログラムでありえる最大のbuf_size
+  int buf_size = (val_field_width + 1) * matrix.num_nonzeros + 1;
+  printf("buf_size: %d\n", buf_size);
+  char data_buffer[buf_size];
+  int data_count = 0;
 
-  /* ptrcrd 行分の row_ptr データを読み込み */
-  int data_line_number = 0;
+  // ptrcrd 行分の row_ptr データを読み込み
+  data_buffer[0] = '\0';
   for (int i = 0; i < ptrcrd; i++) {
     if (fgets(line, sizeof(line), fp) == NULL) {
       fprintf(stderr, "Error reading row_ptr data\n");
       fclose(fp);
+      return 1;
     }
+    // 行末の改行を削除
+    line[strcspn(line, "\n")] = '\0';
+    // データを連結
+    strcat(data_buffer, line);
+    strcat(data_buffer, " ");
   }
   // データをパースして row_ptr に格納
-  for (int j = 0; j < 82 / ptr_field_width; j++) {
-    char field[ptr_field_width + 1];
-    strncpy(field, line + j * ptr_field_width, ptr_field_width);
-    field[ptr_field_width] = '\0';
-    if (strlen(field) == 0 || isspace((unsigned char)field[0])) {
-      continue;
+  char *token = strtok(data_buffer, " ");
+  int index = 0;
+  while (token != NULL && index < matrix.num_rows + 1) {
+    int value = atoi(token) - 1;  // インデックスを0始まりに調整
+    matrix.row_ptr[index++] = value;
+    token = strtok(NULL, " ");
+  }
+  if (index != matrix.num_rows + 1) {
+    fprintf(stderr, "Error: row_ptr data count mismatch\n");
+    fclose(fp);
+    return 1;
+  }
+
+  // indcrd 行分の col_ind データを読み込み
+  data_buffer[0] = '\0';
+  for (int i = 0; i < indcrd; i++) {
+    if (fgets(line, sizeof(line), fp) == NULL) {
+      fprintf(stderr, "Error reading col_ind data\n");
+      fclose(fp);
+      return 1;
     }
-    int value = atoi(field) - 1;  // インデックスを0-basedに変換
-    if (data_line_number < A.num_rows + 1) {
-      A.row_ptr[data_line_number++] = value;
+    // 行末の改行を削除
+    line[strcspn(line, "\n")] = '\0';
+    // データを連結
+    strcat(data_buffer, line);
+    strcat(data_buffer, " ");
+  }
+  // データをパースして col_ind に格納
+  token = strtok(data_buffer, " ");
+  index = 0;
+  while (token != NULL && index < matrix.num_nonzeros) {
+    int value = atoi(token) - 1;  // インデックスを0始まりに調整
+    matrix.col_ind[index++] = value;
+    token = strtok(NULL, " ");
+  }
+  if (index != matrix.num_nonzeros) {
+    fprintf(stderr, "Error: col_ind data count mismatch\n");
+    fclose(fp);
+    return 1;
+  }
+
+  // valcrd 行分の values データを読み込み
+  data_buffer[0] = '\0';
+  for (int i = 0; i < valcrd; i++) {
+    if (fgets(line, sizeof(line), fp) == NULL) {
+      fprintf(stderr, "Error reading values data\n");
+      fclose(fp);
+      return 1;
     }
+    // 行末の改行を削除
+    line[strcspn(line, "\n")] = '\0';
+    // データを連結
+    strcat(data_buffer, line);
+    strcat(data_buffer, " ");
+  }
+  // データをパースして values に格納
+  token = strtok(data_buffer, " ");
+  index = 0;
+  while (token != NULL && index < matrix.num_nonzeros) {
+    double value = atof(token) * matrix.valfmt;  // valfmt を適用
+    matrix.values[index++] = value;
+    token = strtok(NULL, " ");
+  }
+  // printf("index: %d\n", index);
+  if (index != matrix.num_nonzeros) {
+    fprintf(stderr, "Error: values data count mismatch\n");
+    fclose(fp);
+    return 1;
   }
 
   fclose(fp);
 
   /* 抽出したメタデータを表示 */
+  printf("--------Matrix Metadata--------\n");
   printf("title:  %s\n", title);
   printf("date:   %s\n", date);
   printf("author: %s\n", author);
@@ -217,11 +312,34 @@ int main(void) {
   printf("valfmt: %s\n", valfmt);
   printf("rhsfmt: %s\n", rhsfmt);
   printf("\n");
+  printf("-------------------------------\n");
 
-  /**
-   * @brief 行列の情報
-   *
-   */
+  /* CSRMatrix matrix の内容を表示 */
+  printf("row_ptr:\n");
+  for (int i = 0; i < matrix.num_rows + 1; i++) {
+    printf("%d ", matrix.row_ptr[i]);
+  }
+  printf("\n");
+
+  printf("col_ind:\n");
+  for (int i = 0; i < matrix.num_nonzeros; i++) {
+    printf("%d ", matrix.col_ind[i]);
+  }
+  printf("\n");
+
+  printf("values:\n");
+  for (int i = 0; i < matrix.num_nonzeros; i++) {
+    printf("%e ", matrix.values[i]);
+  }
+  printf("\n");
+
+  /* CSRMatrix matrix の内容を表示 */
+  print_csr_matrix(&matrix);
+
+  // メモリの開放
+  free(matrix.row_ptr);
+  free(matrix.col_ind);
+  free(matrix.values);
 
   return 0;
 }

@@ -1,20 +1,18 @@
-#include <stdio.h>
-
-#include "vector.h"
+#include "csr_matrix.h"
 
 int main(void) {
-  int size = 5;
-
-  Vector* b = create_vector(size);
-  for (int i = 0; i < b->size; i++) {
-    b->data[i] = 1.0;
+  const char *filepath = "./data/LFAT5.rb";
+  CSRMatrix *matrix = read_rb_matrix(filepath);
+  if (matrix == NULL) {
+    fprintf(stderr, "Failed to load matrix from file: %s\n", filepath);
+    return 1;
   }
 
-  printf("Vector b: \n");
-  print_vector(b);
+  // 必要に応じて行列の内容を表示
+  print_csr_matrix(matrix);
 
-  // メモリの開放
-  free_vector(b);
+  // メモリの解放
+  free_csr_matrix(matrix);
 
   return 0;
 }

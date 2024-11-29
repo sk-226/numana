@@ -1,6 +1,6 @@
-// inc/csr_matrix.h
-#ifndef _CSR_MATRIX_H_
-#define _CSR_MATRIX_H_
+// inc/csc_matrix.h
+#ifndef _CSC_MATRIX_H_
+#define _CSC_MATRIX_H_
 
 #include "matrix.h"
 
@@ -16,44 +16,44 @@ typedef struct {
   int num_nonzeros;  // 非ゼロ要素の数
   double valfmt;     // Format for numerical values of coefficient
 
-  int *row_ptr;    // 各行の非ゼロ要素の開始位置 (values[row_ptr[i-1]] ~
-  int *col_ind;    // 非ゼロ要素の列インデックス
+  int *col_ptr;    // 各列の非ゼロ要素の開始位置 
+  int *row_ind;    // 非ゼロ要素の行インデックス
   double *values;  // 非ゼロ要素の値
-} CSRMatrix;
+} CSCMatrix;
 
 /**
  * @brief Read a matrix from a file in the Rutherford-Boeing format
  *
  * @param filepath
- * @return CSRMatrix*
+ * @return CSCMatrix*
  */
-CSRMatrix *read_rb_matrix_to_csr(const char *filepath);
+CSCMatrix *read_rb_matrix(const char *filepath);
 
 /**
- * @brief Create a CSRMatrix object
+ * @brief Create a CSCMatrix object
  *
  * @param num_rows
  * @param num_cols
  * @param num_nonzeros
  * @param valfmt
- * @return CSRMatrix*
+ * @return CSCMatrix*
  */
-CSRMatrix *create_csr_matrix(int num_rows, int num_cols, int num_nonzeros,
+CSCMatrix *create_csc_matrix(int num_rows, int num_cols, int num_nonzeros,
                              double valfmt);
 
 /**
- * @brief Free the CSRMatrix object
+ * @brief Free the CSCMatrix object
  *
  * @param matrix
  */
-void free_csr_matrix(CSRMatrix *matrix);
+void free_csc_matrix(CSCMatrix *matrix);
 
 /**
- * @brief Print the CSRMatrix object
+ * @brief Print the CSCMatrix object
  *
  * @param matrix
  */
-void print_csr_matrix(const CSRMatrix *matrix);
+void print_csc_matrix(const CSCMatrix *matrix);
 
 /**
  * @brief Parse the format specifier to get the field width
@@ -62,4 +62,4 @@ void print_csr_matrix(const CSRMatrix *matrix);
  * @return int
  */
 int parse_format(const char *fmt_str);
-#endif  // _CSR_MATRIX_H_
+#endif  // _CSC_MATRIX_H_

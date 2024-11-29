@@ -2,11 +2,12 @@
 #ifndef _CSC_MATRIX_H_
 #define _CSC_MATRIX_H_
 
-#include "matrix.h"
-
 #include <stddef.h>  // NULLを定義する
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "matrix.h"
+#include "vector.h"
 
 // TODO: 行列の特徴etc.の情報も入れられるように
 // e.g. Kind: Structural Problem, Symmetric: Yes, etc...
@@ -16,7 +17,7 @@ typedef struct {
   int num_nonzeros;  // 非ゼロ要素の数
   double valfmt;     // Format for numerical values of coefficient
 
-  int *col_ptr;    // 各列の非ゼロ要素の開始位置 
+  int *col_ptr;    // 各列の非ゼロ要素の開始位置
   int *row_ind;    // 非ゼロ要素の行インデックス
   double *values;  // 非ゼロ要素の値
 } CSCMatrix;
@@ -62,4 +63,17 @@ void print_csc_matrix(const CSCMatrix *matrix);
  * @return int
  */
 int parse_format(const char *fmt_str);
+
+/**
+ * @brief Calculate the product of a matrix and a vector
+ *
+ * @param A
+ * @param x
+ * @param result
+ */
+void mat_vec_mul(const CSCMatrix *A, const Vector *x, Vector *result);
+
+void conjugate_gradient(const CSCMatrix *A, const Vector *b,
+                        const Vector *x_true, const int max_iter,
+                        const double eps);
 #endif  // _CSC_MATRIX_H_

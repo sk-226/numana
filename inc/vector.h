@@ -51,7 +51,7 @@ double vec_dot(const Vector *vec1, const Vector *vec2);
  * @param vec
  * @param scalar
  */
-void vec_scale(Vector *vec, double scalar);
+void vec_scale(Vector *vec, const double scalar, Vector *result);
 
 /**
  * @brief Add two vectors
@@ -75,7 +75,7 @@ void vec_add(Vector *vec1, const Vector *vec2, Vector *result);
  * @note The two vectors must have the same size
  * @note a = a - c という形にしたい場合第一引数にresultと同じポインタを指定する
  */
-void vec_sub(Vector *vec1, const Vector *vec2, Vector *result);
+void vec_sub(Vector *vec1, Vector *vec2, Vector *result);
 
 /**
  * @brief Calculate the 2-norm of the vector

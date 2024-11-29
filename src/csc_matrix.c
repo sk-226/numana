@@ -315,23 +315,23 @@ CSCMatrix* read_rb_matrix(const char* filepath) {
   printf("-------------------------------\n");
 
   /* CSCMatrix matrix の内容を表示 */
-  printf("col_ptr:\n");
-  for (int i = 0; i < matrix->num_rows + 1; i++) {
-    printf("%d ", matrix->col_ptr[i]);
-  }
-  printf("\n");
+  // printf("col_ptr:\n");
+  // for (int i = 0; i < matrix->num_rows + 1; i++) {
+  //   printf("%d ", matrix->col_ptr[i]);
+  // }
+  // printf("\n");
 
-  printf("row_ind:\n");
-  for (int i = 0; i < matrix->num_nonzeros; i++) {
-    printf("%d ", matrix->row_ind[i]);
-  }
-  printf("\n");
+  // printf("row_ind:\n");
+  // for (int i = 0; i < matrix->num_nonzeros; i++) {
+  //   printf("%d ", matrix->row_ind[i]);
+  // }
+  // printf("\n");
 
-  printf("values:\n");
-  for (int i = 0; i < matrix->num_nonzeros; i++) {
-    printf("%e ", matrix->values[i]);
-  }
-  printf("\n");
+  // printf("values:\n");
+  // for (int i = 0; i < matrix->num_nonzeros; i++) {
+  //   printf("%e ", matrix->values[i]);
+  // }
+  // printf("\n");
 
   fclose(fp);
   return matrix;

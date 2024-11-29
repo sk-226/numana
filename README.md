@@ -3,11 +3,13 @@
 This is my side project for my Numerical Analysis class.
 
 I plan to create a library named "NUMANA" for linear algebra calculations.
-HOWEVER, FIRST, I'm working on developing a Conjugate Gradient function.
+~~HOWEVER, FIRST, I'm working on developing a Conjugate Gradient function.~~ <- completed <3
 
 ## RUN
 
 `make`
+`cd bin`
+`./<name>`
 
 ## Environment
 

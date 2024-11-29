@@ -20,7 +20,7 @@ $(MAINOBJ): main.c
 	$(CC) $(CFLAGS) -c main.c -o $(MAINOBJ)
 
 numana: $(OBJECTS) $(MAINOBJ)
-	$(CC) $(OBJECTS) $(MAINOBJ) -o numana
+	$(CC) $(OBJECTS) $(MAINOBJ) -o numana -lm
 
 clean:
 	rm -f $(OBJDIR)/*.o numana

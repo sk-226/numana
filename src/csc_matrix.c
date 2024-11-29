@@ -1,25 +1,20 @@
-/* src/csr_matrix.c */
+/* src/csc_matrix.c */
 
-#include "csr_matrix.h"
-
-#include <ctype.h>  // for parse_format function
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "csc_matrix.h"
 
 // CSR形式の行列を作成
-CSRMatrix* create_csr_matrix(int num_rows, int num_cols, int num_nonzeros,
+CSCMatrix* create_csc_matrix(int num_rows, int num_cols, int num_nonzeros,
                              double valfmt) {
-  CSRMatrix* matrix = (CSRMatrix*)malloc(sizeof(CSRMatrix));
+  CSCMatrix* matrix = (CSCMatrix*)malloc(sizeof(CSCMatrix));
   matrix->num_rows = num_rows;
   matrix->num_cols = num_cols;
   matrix->num_nonzeros = num_nonzeros;
   matrix->valfmt = valfmt;  // 仮の倍率
-  matrix->row_ptr = (int*)malloc(sizeof(int) * (matrix->num_rows + 1));
-  matrix->col_ind = (int*)malloc(sizeof(int) * (matrix->num_nonzeros + 1));
+  matrix->col_ptr = (int*)malloc(sizeof(int) * (matrix->num_cols + 1));
+  matrix->row_ind = (int*)malloc(sizeof(int) * (matrix->num_nonzeros + 1));
   matrix->values = (double*)malloc(sizeof(double) * (matrix->num_nonzeros + 1));
 
-  if (matrix->row_ptr == NULL || matrix->col_ind == NULL ||
+  if (matrix->col_ptr == NULL || matrix->row_ind == NULL ||
       matrix->values == NULL) {
     perror("Error allocating memory for matrix data");
     free(matrix);
@@ -29,36 +24,43 @@ CSRMatrix* create_csr_matrix(int num_rows, int num_cols, int num_nonzeros,
   return matrix;
 }
 
-void free_csr_matrix(CSRMatrix* matrix) {
+void free_csc_matrix(CSCMatrix* matrix) {
   if (matrix != NULL) {
-    free(matrix->row_ptr);
-    free(matrix->col_ind);
+    free(matrix->col_ptr);
+    free(matrix->row_ind);
     free(matrix->values);
     free(matrix);
   }
 }
 
-void print_csr_matrix(const CSRMatrix* matrix) {
-  for (int i = 0; i < matrix->num_rows; i++) {
-    int start = matrix->row_ptr[i];
-    int end = matrix->row_ptr[i + 1];
+void print_csc_matrix(const CSCMatrix* matrix) {
+  printf("matrix: %d x %d, nnz: %d\n", matrix->num_rows, matrix->num_cols,
+         matrix->num_nonzeros);
+  for (int col = 0; col < matrix->num_cols; col++) {
+    int start = matrix->col_ptr[col];
+    int end = matrix->col_ptr[col + 1];
+    // printf("col: %d, start: %d, end: %d\n", col, start, end);
 
-    for (int j = start; j < end; ++j) {
-      int row = i;
-      int column = matrix->col_ind[j];
-      double val = matrix->values[j];
+    for (int idx = start; idx < end; ++idx) {
+      int row = matrix->row_ind[idx];
+      double val = matrix->values[idx];
+      // printf("row: %d, val: %e\n", row, val);
 
-      printf("(%d, %d)  %e \n", row, column, val);
+      // 1ベースのインデックスに変換して出力する場合
+      printf("(%d, %d)  %e \n", row + 1, col + 1, val);
+      if (col != row) {
+        printf("(%d, %d)  %e \n", col + 1, row + 1, val);
+      }
     }
   }
 }
 
 /**
  * read_rb_matrix
- * -> parser fn to convert csr_matrix from rm format matrix
- * -> create_csr_matrix
+ * -> parser fn to convert csc_matrix from rm format matrix
+ * -> create_csc_matrix
  *  */
-CSRMatrix* read_rb_matrix_to_csr(const char* filepath) {
+CSCMatrix* read_rb_matrix(const char* filepath) {
   FILE* fp = fopen(filepath, "r");
   if (fp == NULL) {
     perror("Error opening file");
@@ -167,10 +169,10 @@ CSRMatrix* read_rb_matrix_to_csr(const char* filepath) {
   // printf("val_field_width: %d\n", val_field_width);
 
   // TODO:
-  // valfmtをdouble型でキャストして、create_csr_matrixの引数として入るようにする
-  CSRMatrix* matrix = create_csr_matrix(nrow, ncol, nnzero, 1.0);
+  // valfmtをdouble型でキャストして、create_csc_matrixの引数として入るようにする
+  CSCMatrix* matrix = create_csc_matrix(nrow, ncol, nnzero, 1.0);
   if (matrix == NULL) {
-    perror("Error allocating memory for CSRMatrix");
+    perror("Error allocating memory for CSCMatrix");
     fclose(fp);
     return NULL;
   }
@@ -181,7 +183,7 @@ CSRMatrix* read_rb_matrix_to_csr(const char* filepath) {
   char* data_buffer = (char*)malloc(buf_size);
   if (data_buffer == NULL) {
     perror("Error allocating memory for data buffer");
-    free_csr_matrix(matrix);
+    free_csc_matrix(matrix);
     fclose(fp);
     return NULL;
   }
@@ -189,12 +191,12 @@ CSRMatrix* read_rb_matrix_to_csr(const char* filepath) {
 
   int index = 0;
 
-  /* ptrcrd 行分の row_ptr データを読み込み */
+  /* ptrcrd 行分の col_ptr データを読み込み */
   data_buffer[0] = '\0';  // バッファを初期化
   for (int i = 0; i < ptrcrd; i++) {
     if (fgets(line, sizeof(line), fp) == NULL) {
-      fprintf(stderr, "Error reading row_ptr data\n");
-      free_csr_matrix(matrix);
+      fprintf(stderr, "Error reading col_ptr data\n");
+      free_csc_matrix(matrix);
       fclose(fp);
       return NULL;
     }
@@ -204,27 +206,27 @@ CSRMatrix* read_rb_matrix_to_csr(const char* filepath) {
     strcat(data_buffer, line);
     strcat(data_buffer, " ");
   }
-  // データをパースして row_ptr に格納
+  // データをパースして col_ptr に格納
   char* token = strtok(data_buffer, " ");
   index = 0;
-  while (token != NULL && index < matrix->num_rows + 1) {
+  while (token != NULL && index < matrix->num_cols + 1) {
     int value = atoi(token) - 1;  // インデックスを0始まりに調整
-    matrix->row_ptr[index++] = value;
+    matrix->col_ptr[index++] = value;
     token = strtok(NULL, " ");
   }
-  if (index != matrix->num_rows + 1) {
-    fprintf(stderr, "Error: row_ptr data count mismatch\n");
-    free_csr_matrix(matrix);
+  if (index != matrix->num_cols + 1) {
+    fprintf(stderr, "Error: col_ptr data count mismatch\n");
+    free_csc_matrix(matrix);
     fclose(fp);
     return NULL;
   }
 
-  /* indcrd 行分の col_ind データを読み込み */
+  /* indcrd 行分の row_ind データを読み込み */
   data_buffer[0] = '\0';
   for (int i = 0; i < indcrd; i++) {
     if (fgets(line, sizeof(line), fp) == NULL) {
-      fprintf(stderr, "Error reading col_ind data\n");
-      free_csr_matrix(matrix);
+      fprintf(stderr, "Error reading row_ind data\n");
+      free_csc_matrix(matrix);
       fclose(fp);
       return NULL;
     }
@@ -234,17 +236,17 @@ CSRMatrix* read_rb_matrix_to_csr(const char* filepath) {
     strcat(data_buffer, line);
     strcat(data_buffer, " ");
   }
-  // データをパースして col_ind に格納
+  // データをパースして row_ind に格納
   token = strtok(data_buffer, " ");
   index = 0;
   while (token != NULL && index < matrix->num_nonzeros) {
     int value = atoi(token) - 1;  // インデックスを0始まりに調整
-    matrix->col_ind[index++] = value;
+    matrix->row_ind[index++] = value;
     token = strtok(NULL, " ");
   }
   if (index != matrix->num_nonzeros) {
-    fprintf(stderr, "Error: col_ind data count mismatch\n");
-    free_csr_matrix(matrix);
+    fprintf(stderr, "Error: row_ind data count mismatch\n");
+    free_csc_matrix(matrix);
     fclose(fp);
     return NULL;
   }
@@ -254,7 +256,7 @@ CSRMatrix* read_rb_matrix_to_csr(const char* filepath) {
   for (int i = 0; i < valcrd; i++) {
     if (fgets(line, sizeof(line), fp) == NULL) {
       fprintf(stderr, "Error reading values data\n");
-      free_csr_matrix(matrix);
+      free_csc_matrix(matrix);
       fclose(fp);
       return NULL;
     }
@@ -264,7 +266,6 @@ CSRMatrix* read_rb_matrix_to_csr(const char* filepath) {
     strcat(data_buffer, line);
     strcat(data_buffer, " ");
   }
-  printf("data_buffer: %s\n", data_buffer);
   // データをパースして values に格納
   token = strtok(data_buffer, " ");
   index = 0;
@@ -273,13 +274,10 @@ CSRMatrix* read_rb_matrix_to_csr(const char* filepath) {
     matrix->values[index++] = value;
     token = strtok(NULL, " ");
   }
-  for (int i = 0; i < matrix->num_nonzeros; i++) {
-    printf("%e ", matrix->values[i]);
-  }
   // printf("index: %d\n", index);
   if (index != matrix->num_nonzeros) {
     fprintf(stderr, "Error: values data count mismatch\n");
-    free_csr_matrix(matrix);
+    free_csc_matrix(matrix);
     fclose(fp);
     return NULL;
   }
@@ -316,16 +314,16 @@ CSRMatrix* read_rb_matrix_to_csr(const char* filepath) {
   printf("\n");
   printf("-------------------------------\n");
 
-  /* CSRMatrix matrix の内容を表示 */
-  printf("row_ptr:\n");
+  /* CSCMatrix matrix の内容を表示 */
+  printf("col_ptr:\n");
   for (int i = 0; i < matrix->num_rows + 1; i++) {
-    printf("%d ", matrix->row_ptr[i]);
+    printf("%d ", matrix->col_ptr[i]);
   }
   printf("\n");
 
-  printf("col_ind:\n");
+  printf("row_ind:\n");
   for (int i = 0; i < matrix->num_nonzeros; i++) {
-    printf("%d ", matrix->col_ind[i]);
+    printf("%d ", matrix->row_ind[i]);
   }
   printf("\n");
 

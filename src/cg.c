@@ -4,6 +4,17 @@
 
 /* CSCMatrix用のCG法(Conjugate Gradient method) */
 
+/**
+ * @brief CG法による連立一次方程式の解法
+ *
+ * @param A 係数行列
+ * @param b 右辺項
+ * @param x_true 真の解
+ * @param max_iter 最大反復回数
+ * @param eps 収束判定基準
+ * TODO: 誤差解析用にapend, errを追加
+ */
+
 void conjugate_gradient(const CSCMatrix *A, const Vector *b,
                         const Vector *x_true, const int max_iter,
                         const double eps) {
@@ -20,7 +31,7 @@ void conjugate_gradient(const CSCMatrix *A, const Vector *b,
     x->values[i] = 0.0;
   }
 
-  print_vector(b);
+  // print_vector(b);
 
   // r = b (x_0 = 0)
   vec_copy(b, r);
@@ -30,9 +41,9 @@ void conjugate_gradient(const CSCMatrix *A, const Vector *b,
 
   double rho_old = vec_dot(r, r);
 
-  double norm2_x_true = vec_norm(x_true);
+  // double norm2_x_true = vec_norm(x_true);
   double norm2_b = vec_norm(b);
-  printf("norm2_b = %e\n", norm2_b);
+  // printf("norm2_b = %e\n", norm2_b);
 
   for (int i = 0; i < max_iter; i++) {
     // w = A * p
@@ -54,13 +65,18 @@ void conjugate_gradient(const CSCMatrix *A, const Vector *b,
     vec_sub(r, tmp, r);
 
     // vec_sub(x_true, x, err);
+    double rel_res = vec_norm(r) / norm2_b;
 
     // 収束判定
-    if ((vec_norm(r) / norm2_b) < eps) {
+    if (rel_res < eps) {
+      printf("-------------------------------------\n");
       printf("Converged in %d iterations\n", i + 1);
+      printf("Relres_norm = %e\n", rel_res);
+      printf("-------------------------------------\n");
       break;
     } else {
-      printf("res_norm = %e\n", vec_norm(r) / norm2_b);
+      // printf("Iteration %d\n", i + 1);
+      // printf("Relres_norm = %e\n", rel_res);
     }
     // printf("%e\n", vec_norm(r));
 
@@ -71,12 +87,6 @@ void conjugate_gradient(const CSCMatrix *A, const Vector *b,
     // 探索方向の更新: p = r + beta * p
     vec_scale(p, beta, tmp);  // beta * p
     vec_add(r, tmp, p);
-
-    printf("Iteration %d\n", i + 1);
-    // printf("rho_old = %e\n", rho_old);
-    // printf("sigma = %e\n", sigma);
-    // printf("alpha = %e\n", alpha);
-    printf("Residual norm = %e\n", (vec_norm(r) / norm2_b));
   }
 
   if ((vec_norm(r) / norm2_b) >= eps) {

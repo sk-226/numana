@@ -1,3 +1,5 @@
+#include <time.h>
+
 #include "csc_matrix.h"
 #include "vector.h"
 
@@ -34,8 +36,15 @@ int main(void) {
 
   printf("start\n");
 
+  clock_t start = clock();
+
   // conjugate_gradient(A, b, x_true, MAX_ITER, (double)EPS);
   conjugate_gradient(A, b, x_true, (int)(2 * (A->num_rows)), EPS);
+
+  clock_t end = clock();
+
+  double execution_time = (double)(end - start) / CLOCKS_PER_SEC;
+  printf("Execution time: %.6f seconds\n", execution_time);
 
   printf("finished\n");
   free_csc_matrix(A);

@@ -5,7 +5,7 @@ int main(void) {
 
   Vector *b = create_vector(size);
   for (int i = 0; i < b->size; i++) {
-    b->data[i] = 1.0;
+    b->values[i] = 1.0;
   }
 
   printf("Vector b: \n");

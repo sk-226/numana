@@ -1,7 +1,7 @@
 #include "csr_matrix.h"
 
 int main(void) {
-  const char *filepath = "./data/LFAT5.rb";
+  const char *filepath = "../data/LFAT5.rb";
   CSRMatrix *matrix = read_rb_matrix_to_csr(filepath);
   if (matrix == NULL) {
     fprintf(stderr, "Failed to load matrix from file: %s\n", filepath);

@@ -2,7 +2,7 @@
 #include "vector.h"
 
 int main(void) {
-  const char *filepath = "./data/LFAT5.rb";
+  const char *filepath = "../data/LFAT5.rb";
   CSCMatrix *matrix = read_rb_matrix(filepath);
   if (matrix == NULL) {
     fprintf(stderr, "Failed to load matrix from file: %s\n", filepath);

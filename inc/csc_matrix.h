@@ -72,4 +72,8 @@ int parse_format(const char *fmt_str);
  * @param result
  */
 void mat_vec_mul(const CSCMatrix *A, const Vector *x, Vector *result);
+
+void conjugate_gradient(const CSCMatrix *A, const Vector *b,
+                        const Vector *x_true, const int max_iter,
+                        const double eps);
 #endif  // _CSC_MATRIX_H_

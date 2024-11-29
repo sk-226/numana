@@ -20,9 +20,16 @@ double vec_dot(const Vector *vec1, const Vector *vec2) {
 }
 
 /* ベクトルのスカラー倍 */
-void vec_scale(Vector *vec, double scalar) {
+void vec_scale(Vector *vec, const double scalar, Vector *result) {
+  if (vec->size != result->size) {
+    fprintf(
+        stderr,
+        "Error in vec_scale: Vector sizes do not match in file %s at line %d\n",
+        __FILE__, __LINE__);
+    exit(EXIT_FAILURE);
+  }
   for (int i = 0; i < vec->size; i++) {
-    vec->values[i] *= scalar;
+    result->values[i] = vec->values[i] * scalar;
   }
 }
 
@@ -41,7 +48,7 @@ void vec_add(Vector *vec1, const Vector *vec2, Vector *result) {
 }
 
 /* ベクトルの減算 */
-void vec_sub(Vector *vec1, const Vector *vec2, Vector *result) {
+void vec_sub(Vector *vec1, Vector *vec2, Vector *result) {
   if (vec1->size != vec2->size || vec1->size != result->size) {
     fprintf(stderr,
             "Error: Vector sizes do not match in file %s at line # %d \n",
